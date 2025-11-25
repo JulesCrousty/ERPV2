@@ -8,6 +8,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
 import { CoreModule } from './modules/core/core.module';
+import { FiModule } from './modules/fi/fi.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CoreModule } from './modules/core/core.module';
     }),
     AuthModule,
     CoreModule,
+    FiModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
