@@ -1,23 +1,19 @@
 import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
 
-export class UpdateWarehouseDto {
+export class UpdateStorageBinDto {
   @IsOptional()
   @IsInt()
-  company_id?: number;
+  storage_type_id?: number;
 
   @IsOptional()
   @IsString()
   code?: string;
 
   @IsOptional()
-  @IsString()
-  name?: string;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
   @IsBoolean()
-  is_active?: boolean;
+  is_blocked?: boolean;
+
+  @IsOptional()
+  @IsString()
+  block_reason?: string;
 }
