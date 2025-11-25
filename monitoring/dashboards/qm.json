@@ -1,0 +1,132 @@
+{
+  "title": "ERP Flux — Qualité (QM)",
+  "tags": ["ERP", "QM"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Flux Success vs Errors",
+      "targets": [
+        {
+          "expr": "sum by(level)(count_over_time({module=\"QM\"}[5m]))",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        }
+      }
+    },
+    {
+      "type": "table",
+      "title": "Dernières erreurs QM",
+      "targets": [
+        {
+          "expr": "{module=\"QM\", level=\"error\"} | line_format '{{.__line__}}'",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true
+      }
+    },
+    {
+      "type": "bargauge",
+      "title": "Histogramme log-level (info/warn/error)",
+      "targets": [
+        {
+          "expr": "sum by(level)(count_over_time({module=\"QM\"}[1h]))",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "options": {
+        "displayMode": "gradient"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Temps de réponse API QM",
+      "targets": [
+        {
+          "expr": "avg_over_time({module=\"QM\"} | regexp \"response_ms=(?P<response_ms>\\d+)\" | unwrap response_ms [5m])",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        },
+        {
+          "expr": "max_over_time({module=\"QM\"} | regexp \"response_ms=(?P<response_ms>\\d+)\" | unwrap response_ms [5m])",
+          "refId": "B",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Répartition par endpoint",
+      "targets": [
+        {
+          "expr": "sum by(endpoint)(count_over_time({module=\"QM\"} | regexp \"endpoint=(?P<endpoint>[a-zA-Z0-9_/.-]+)\" [15m]))",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        }
+      }
+    },
+    {
+      "type": "logs",
+      "title": "Logs filtrés par MODULE=QM",
+      "targets": [
+        {
+          "expr": "{module=\"QM\"}",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "options": {
+        "showLabels": true,
+        "showTime": true,
+        "wrapLogMessage": true
+      }
+    }
+  ]
+}

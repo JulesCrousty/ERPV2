@@ -1,0 +1,108 @@
+{
+  "title": "ERP Monitoring — Global",
+  "tags": ["ERP", "Global"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Erreurs globales (24h)",
+      "targets": [
+        {
+          "expr": "sum(count_over_time({level=\"error\"}[24h]))",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "type": "logs",
+      "title": "Logs récents (5 minutes)",
+      "targets": [
+        {
+          "expr": "{job=\"docker\"}",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "timeFrom": "now-5m",
+      "options": {
+        "showLabels": true,
+        "showTime": true,
+        "wrapLogMessage": true
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Temps de réponse API moyen",
+      "targets": [
+        {
+          "expr": "avg_over_time({job=\"docker\"} | regexp \"response_ms=(?P<response_ms>\\\\d+)\" | unwrap response_ms [5m])",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "hidden"
+        }
+      }
+    },
+    {
+      "type": "bargauge",
+      "title": "Appels API par module (5m)",
+      "targets": [
+        {
+          "expr": "sum by(module)(count_over_time({module!=""}[5m]))",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "options": {
+        "displayMode": "basic"
+      }
+    },
+    {
+      "type": "bargauge",
+      "title": "Statuts flux (success/warning/error/cancelled)",
+      "targets": [
+        {
+          "expr": "sum by(status)(count_over_time({status!=""}[1h]))",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          }
+        }
+      ],
+      "options": {
+        "displayMode": "gradient"
+      }
+    }
+  ]
+}
