@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CoreModule } from './modules/core/core.module';
 import { FiModule } from './modules/fi/fi.module';
 import { SdModule } from './modules/sd/sd.module';
+import { HrModule } from './modules/hr/hr.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { SdModule } from './modules/sd/sd.module';
     AuthModule,
     CoreModule,
     FiModule,
+    HrModule,
     SdModule,
   ],
   providers: [
