@@ -1,0 +1,5 @@
+- [ ] Lots d'inspection créés
+- [ ] Résultats saisis
+- [ ] Bloquants qualité détectés
+- [ ] Déviations escaladées via workflow
+- [ ] Rapports QM envoyés à Analytics

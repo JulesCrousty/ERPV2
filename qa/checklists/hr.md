@@ -1,0 +1,5 @@
+- [ ] Fiche employé créée
+- [ ] Pointages saisis
+- [ ] Paie calculée
+- [ ] Autorisations RH respectées
+- [ ] Export paie généré

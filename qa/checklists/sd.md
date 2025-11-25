@@ -1,0 +1,5 @@
+- [ ] Commande client créée
+- [ ] Livraisons générées
+- [ ] Facturation possible
+- [ ] Autorisations SD vérifiées
+- [ ] KPI SD affichés sur dashboard

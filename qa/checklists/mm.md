@@ -1,0 +1,5 @@
+- [ ] Peut créer une commande achat
+- [ ] Réception stock (GR) enregistrée
+- [ ] Transfert WM déclenché
+- [ ] Permissions MM respectées
+- [ ] Logs MM présents dans Loki

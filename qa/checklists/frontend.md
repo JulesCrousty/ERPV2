@@ -1,0 +1,5 @@
+- [ ] Login fonctionne
+- [ ] Navigation sidebar opérationnelle
+- [ ] Tables shadcn interactives
+- [ ] Timeline workflow affichée
+- [ ] Graphiques analytics visibles

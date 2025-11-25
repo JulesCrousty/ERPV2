@@ -1,0 +1,5 @@
+- [ ] Ordre de production créé
+- [ ] Confirmation d'opérations effectuée
+- [ ] Consommation matières enregistrée
+- [ ] Calcul des coûts validé
+- [ ] Statut de fin PP mis à jour

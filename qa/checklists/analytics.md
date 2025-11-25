@@ -1,0 +1,5 @@
+- [ ] Dataset exécuté (SUM)
+- [ ] COUNT BY group fonctionne
+- [ ] JOIN multi-datasource validé
+- [ ] Filtres dataset appliqués
+- [ ] Dashboard rendu sans erreur

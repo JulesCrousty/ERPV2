@@ -1,0 +1,5 @@
+- [ ] Peut créer un document FI
+- [ ] Peut approuver un document
+- [ ] Workflow FI fonctionne
+- [ ] Logs FI visibles dans Grafana
+- [ ] Analytics FI fonctionne

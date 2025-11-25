@@ -1,0 +1,5 @@
+- [ ] Route conditionnelle validée
+- [ ] Auto-approve fonctionne
+- [ ] Étapes multiples enchaînées
+- [ ] Rejet notifié
+- [ ] Événements WORKFLOW_APPROVED / REJECTED émis

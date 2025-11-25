@@ -1,0 +1,5 @@
+- [ ] TO créé depuis GR
+- [ ] TO confirmé
+- [ ] Stock mis à jour en WM
+- [ ] Interface MM/WM cohérente
+- [ ] Alertes monitoring WM actives
