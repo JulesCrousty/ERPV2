@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class PurchaseOrderItemDto {
+export class GoodsReceiptItemDto {
   @IsInt()
   material_id: number;
 
@@ -20,30 +20,38 @@ export class PurchaseOrderItemDto {
   @IsString()
   uom: string;
 
+  @IsString()
+  storage_location_code: string;
+
   @IsNumber()
   unit_price: number;
 
   @IsOptional()
-  @IsDateString()
-  delivery_date?: string;
+  @IsInt()
+  po_item_id?: number;
 }
 
-export class CreatePurchaseOrderDto {
+export class CreateGoodsReceiptDto {
   @IsInt()
   company_id: number;
 
+  @IsDateString()
+  posting_date: string;
+
+  @IsOptional()
   @IsInt()
-  vendor_id: number;
+  vendor_id?: number;
+
+  @IsOptional()
+  @IsInt()
+  purchase_order_id?: number;
 
   @IsString()
   currency: string;
 
-  @IsDateString()
-  order_date: string;
-
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => PurchaseOrderItemDto)
-  items: PurchaseOrderItemDto[];
+  @Type(() => GoodsReceiptItemDto)
+  items: GoodsReceiptItemDto[];
 }

@@ -11,22 +11,18 @@ import {
 } from 'typeorm';
 import { Company } from '../../core/entities/company.entity';
 import { MmVendor } from './mm-vendor.entity';
+import { MmPurchaseOrder } from './mm-purchase-order.entity';
 import { User } from '../../auth/entities/user.entity';
-import { MmPurchaseOrderItem } from './mm-purchase-order-item.entity';
+import { MmGoodsReceiptItem } from './mm-goods-receipt-item.entity';
 
-export enum PurchaseOrderStatus {
-  DRAFT = 'DRAFT',
-  APPROVED = 'APPROVED',
-  ORDERED = 'ORDERED',
-  PARTIALLY_RECEIVED = 'PARTIALLY_RECEIVED',
-  RECEIVED = 'RECEIVED',
-  CLOSED = 'CLOSED',
-  CANCELLED = 'CANCELLED',
+export enum GoodsReceiptStatus {
+  POSTED = 'POSTED',
+  REVERSED = 'REVERSED',
 }
 
-@Entity('mm_purchase_order')
-@Index(['company', 'poNumber'], { unique: true })
-export class MmPurchaseOrder {
+@Entity('mm_goods_receipt')
+@Index(['company', 'grNumber'], { unique: true })
+export class MmGoodsReceipt {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -34,21 +30,22 @@ export class MmPurchaseOrder {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
-  @Column({ name: 'po_number' })
-  poNumber: string;
+  @Column({ name: 'gr_number' })
+  grNumber: string;
+
+  @Column({ name: 'posting_date', type: 'date' })
+  postingDate: Date;
 
   @ManyToOne(() => MmVendor, { eager: true, nullable: true })
   @JoinColumn({ name: 'vendor_id' })
   vendor?: MmVendor;
 
-  @Column({ name: 'order_date', type: 'date' })
-  orderDate: Date;
+  @ManyToOne(() => MmPurchaseOrder, { eager: true, nullable: true })
+  @JoinColumn({ name: 'purchase_order_id' })
+  purchaseOrder?: MmPurchaseOrder;
 
-  @Column()
-  currency: string;
-
-  @Column({ type: 'enum', enum: PurchaseOrderStatus, default: PurchaseOrderStatus.DRAFT })
-  status: PurchaseOrderStatus;
+  @Column({ type: 'enum', enum: GoodsReceiptStatus, default: GoodsReceiptStatus.POSTED })
+  status: GoodsReceiptStatus;
 
   @ManyToOne(() => User, { eager: true, nullable: true })
   @JoinColumn({ name: 'created_by' })
@@ -60,9 +57,9 @@ export class MmPurchaseOrder {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => MmPurchaseOrderItem, (item) => item.purchaseOrder, {
+  @OneToMany(() => MmGoodsReceiptItem, (item) => item.goodsReceipt, {
     cascade: true,
     eager: true,
   })
-  items: MmPurchaseOrderItem[];
+  items: MmGoodsReceiptItem[];
 }

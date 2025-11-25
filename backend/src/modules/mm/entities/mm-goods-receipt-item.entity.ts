@@ -1,15 +1,15 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { MmPurchaseOrder } from './mm-purchase-order.entity';
+import { MmGoodsReceipt } from './mm-goods-receipt.entity';
 import { MmMaterial } from './mm-material.entity';
 
-@Entity('mm_purchase_order_item')
-export class MmPurchaseOrderItem {
+@Entity('mm_goods_receipt_item')
+export class MmGoodsReceiptItem {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => MmPurchaseOrder, (order) => order.items, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'purchase_order_id' })
-  purchaseOrder: MmPurchaseOrder;
+  @ManyToOne(() => MmGoodsReceipt, (receipt) => receipt.items, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'goods_receipt_id' })
+  goodsReceipt: MmGoodsReceipt;
 
   @Column({ name: 'line_number' })
   lineNumber: number;
@@ -21,15 +21,12 @@ export class MmPurchaseOrderItem {
   @Column({ type: 'numeric', precision: 18, scale: 3 })
   quantity: number;
 
-  @Column({ name: 'received_quantity', type: 'numeric', precision: 18, scale: 3, default: 0 })
-  receivedQuantity: number;
-
   @Column()
   uom: string;
 
+  @Column({ name: 'storage_location_code' })
+  storageLocationCode: string;
+
   @Column({ name: 'unit_price', type: 'numeric', precision: 18, scale: 2 })
   unitPrice: number;
-
-  @Column({ name: 'delivery_date', type: 'date', nullable: true })
-  deliveryDate?: Date;
 }
