@@ -1,11 +1,11 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class LoginDto {
+export class CreateCurrencyDto {
   @IsString()
   @IsNotEmpty()
-  username: string;
+  code: string;
 
   @IsString()
   @IsNotEmpty()
-  password: string;
+  label: string;
 }

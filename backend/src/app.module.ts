@@ -6,6 +6,8 @@ import { ConfigService } from './config/config.service';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { AuthModule } from './modules/auth/auth.module';
+import { CoreModule } from './modules/core/core.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
         synchronize: false,
       }),
     }),
+    AuthModule,
+    CoreModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
