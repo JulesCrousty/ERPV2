@@ -1,7 +1,7 @@
 FROM node:18-alpine
 WORKDIR /app
 COPY backend/package*.json ./
-RUN npm ci
+RUN npm install
 COPY backend/. .
 COPY run-migrations.sh ./
 RUN npm run build
