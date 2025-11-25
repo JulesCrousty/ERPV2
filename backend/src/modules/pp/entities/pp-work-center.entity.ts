@@ -5,17 +5,14 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Company } from '../../core/entities/company.entity';
-import { MmMaterial } from '../../mm/entities/mm-material.entity';
-import { PpBomItem } from './pp-bom-item.entity';
 
-@Entity('pp_bom')
-@Index(['company', 'material', 'bomCode'], { unique: true })
-export class PpBom {
+@Entity('pp_work_center')
+@Index(['company', 'code'], { unique: true })
+export class PpWorkCenter {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,21 +20,23 @@ export class PpBom {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
-  @ManyToOne(() => MmMaterial, { eager: true })
-  @JoinColumn({ name: 'material_id' })
-  material: MmMaterial;
+  @Column()
+  code: string;
 
-  @Column({ name: 'bom_code' })
-  bomCode: string;
+  @Column()
+  name: string;
 
   @Column({ nullable: true })
   description?: string;
 
+  @Column({ name: 'capacity_per_hour', type: 'numeric', precision: 18, scale: 3, nullable: true })
+  capacityPerHour?: number;
+
+  @Column({ name: 'cost_per_hour', type: 'numeric', precision: 18, scale: 2, nullable: true })
+  costPerHour?: number;
+
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
-
-  @OneToMany(() => PpBomItem, (item) => item.bom, { cascade: true })
-  items: PpBomItem[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
