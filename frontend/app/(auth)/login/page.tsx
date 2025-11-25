@@ -10,14 +10,15 @@ import { toast } from "@/ui/use-toast";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading } = useAuth();
-  const [username, setUsername] = useState("");
+  const { login, loading, refreshSession } = useAuth();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login({ username, password });
+      await login({ email, password });
+      await refreshSession();
       toast({ title: "Welcome back", description: "You are now connected." });
       router.push("/");
     } catch (error) {
@@ -35,15 +36,15 @@ export default function LoginPage() {
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Username</label>
-              <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="john.doe" required />
+              <label className="text-sm font-medium text-slate-700">Email</label>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="john.doe@company.com" required />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Password</label>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Login"}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing in..." : "Login"}
             </Button>
           </form>
         </CardContent>

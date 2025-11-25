@@ -1,4 +1,4 @@
-export type Role = "admin" | "finance" | "operations" | "hr" | "viewer";
+export type Role = "admin" | "manager" | "employee" | "finance" | "operations" | "hr" | "viewer";
 
 export interface User {
   id: string;
@@ -13,7 +13,7 @@ export interface Session {
 }
 
 export interface LoginPayload {
-  username: string;
+  email: string;
   password: string;
 }
 

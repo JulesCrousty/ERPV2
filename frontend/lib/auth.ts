@@ -1,14 +1,13 @@
-import { get, post } from "./api";
-import { Session, LoginPayload } from "@/types/common";
+import { api } from "./api";
 
-export async function login(payload: LoginPayload) {
-  return post<Session, LoginPayload>("/auth/login", payload);
+export async function login(email: string, password: string) {
+  return api.post("/auth/login", { email, password });
 }
 
 export async function logout() {
-  return post<void>("/auth/logout");
+  return api.post("/auth/logout");
 }
 
 export async function getSession() {
-  return get<Session>("/auth/session");
+  return api.get("/auth/me");
 }

@@ -4,9 +4,10 @@ import { Inter } from "next/font/google";
 import Sidebar from "@/components/sidebar";
 import Header from "@/components/header";
 import { ReactQueryProvider } from "@/lib/react-query-provider";
-import { Toaster } from "@/ui/toaster";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { SidebarProvider } from "@/hooks/useSidebar";
+import { Toaster } from "@/components/toaster";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,7 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Sidebar />
                 <div className="flex flex-1 flex-col">
                   <Header />
-                  <main className="px-8 py-6 space-y-6">{children}</main>
+                  <main className="px-8 py-6 space-y-6">
+                    <ErrorBoundary>{children}</ErrorBoundary>
+                  </main>
                 </div>
               </div>
             </SidebarProvider>

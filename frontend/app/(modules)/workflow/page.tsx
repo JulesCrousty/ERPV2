@@ -4,58 +4,74 @@ import { ColumnDef } from "@tanstack/react-table";
 import Card from "@/components/card";
 import { DataTable } from "@/components/data-table";
 import { PageTitle } from "@/components/page-title";
-import { WorkflowItem } from "@/types/workflow";
-import { Badge } from "@/ui/badge";
+import { useApi } from "@/hooks/useApi";
+import { useProtectedRoute } from "@/hooks/useAuth";
+import { Alert, AlertDescription, AlertTitle } from "@/ui/alert";
+import { Button } from "@/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { Loader } from "@/components/loader";
 
-const items: WorkflowItem[] = [
-  { id: "WF-01", title: "Purchase Approval", requester: "Marie Curie", step: "Manager", status: "Pending", submittedAt: "2024-07-02" },
-  { id: "WF-02", title: "CapEx Request", requester: "Alan Turing", step: "Finance", status: "Approved", submittedAt: "2024-06-28" },
-  { id: "WF-03", title: "Access Provisioning", requester: "Ada Lovelace", step: "IT", status: "Pending", submittedAt: "2024-07-01" }
-];
+interface WorkflowInstance {
+  id: string;
+  type: string;
+  status: string;
+  owner: string;
+}
 
-const columns: ColumnDef<WorkflowItem>[] = [
+const columns: ColumnDef<WorkflowInstance>[] = [
   { header: "ID", accessorKey: "id" },
-  { header: "Title", accessorKey: "title" },
-  { header: "Requester", accessorKey: "requester" },
-  { header: "Step", accessorKey: "step" },
-  { header: "Status", cell: ({ row }) => <Badge variant="secondary">{row.original.status}</Badge> },
-  { header: "Submitted", accessorKey: "submittedAt" }
+  { header: "Type", accessorKey: "type" },
+  { header: "Status", accessorKey: "status" },
+  { header: "Owner", accessorKey: "owner" }
 ];
 
 export default function WorkflowPage() {
+  useProtectedRoute(["admin", "manager", "employee"]);
+  const workflowApi = useApi("/workflow/instances");
+  const instances = workflowApi.list({ limit: 30 });
+
+  const actionMutation = useMutation({
+    mutationFn: (id: string) => api.post("/workflow/actions", { action: "ADVANCE", reference: id }),
+    onSuccess: () => instances.refetch()
+  });
+
   return (
     <div className="space-y-6">
-      <PageTitle title="Workflow Engine" subtitle="Automated approvals" />
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card title="Timeline" description="Recent routing steps">
-          <ol className="space-y-3 text-sm text-slate-700 dark:text-slate-200">
-            <li className="flex items-start gap-3">
-              <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
-              <div>
-                <p className="font-medium">CapEx request approved</p>
-                <p className="text-slate-500">Finance • 2h ago</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
-              <div>
-                <p className="font-medium">Purchase order escalated</p>
-                <p className="text-slate-500">Manager • 4h ago</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
-              <div>
-                <p className="font-medium">User access provisioning</p>
-                <p className="text-slate-500">IT • 8h ago</p>
-              </div>
-            </li>
-          </ol>
+      <PageTitle title="Workflow" subtitle="Process automation" />
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card title="Instances" description="Active">
+          {instances.isLoading ? <Loader /> : <p className="text-2xl font-semibold">{instances.data?.length ?? 0}</p>}
         </Card>
-        <Card title="Pending Requests" description="Action needed">
-          <DataTable columns={columns} data={items} />
+        <Card title="Automation" description="Actions triggered" className="bg-primary/5">
+          <p className="text-2xl font-semibold">+Workflow</p>
+        </Card>
+        <Card title="Ownership" description="Managers">
+          <p className="text-2xl font-semibold">Team wide</p>
         </Card>
       </div>
+      {instances.error && (
+        <Alert variant="destructive">
+          <AlertTitle>Workflow offline</AlertTitle>
+          <AlertDescription>{(instances.error as Error).message}</AlertDescription>
+        </Alert>
+      )}
+      <Card title="Workflow Instances" description="Runtime processes">
+        <DataTable columns={columns} data={instances.data ?? []} loading={instances.isLoading} />
+        <div className="mt-4 flex flex-wrap gap-2">
+          {(instances.data ?? []).map((instance) => (
+            <Button
+              key={instance.id}
+              size="sm"
+              variant="outline"
+              onClick={() => actionMutation.mutate(instance.id)}
+              disabled={actionMutation.isLoading}
+            >
+              Advance {instance.id}
+            </Button>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }

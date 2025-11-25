@@ -15,14 +15,17 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
+import { Loader } from "./loader";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData, any>[];
   data: TData[];
   searchable?: boolean;
+  loading?: boolean;
+  emptyMessage?: string;
 }
 
-export function DataTable<TData>({ columns, data, searchable = true }: DataTableProps<TData>) {
+export function DataTable<TData>({ columns, data, searchable = true, loading, emptyMessage }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
 
@@ -69,44 +72,50 @@ export function DataTable<TData>({ columns, data, searchable = true }: DataTable
         </div>
       )}
       <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-card overflow-hidden">
-        <Table>
-          <TableHeader className="bg-slate-50 dark:bg-slate-800/60">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-slate-600 dark:text-slate-300">
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className={header.column.getCanSort() ? "cursor-pointer select-none" : ""}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {{ asc: " ↑", desc: " ↓" }[header.column.getIsSorted() as string] ?? null}
-                      </div>
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() ? "selected" : undefined}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+        {loading ? (
+          <div className="flex h-48 items-center justify-center">
+            <Loader label="Loading data" />
+          </div>
+        ) : (
+          <Table>
+            <TableHeader className="bg-slate-50 dark:bg-slate-800/60">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id} className="text-slate-600 dark:text-slate-300">
+                      {header.isPlaceholder ? null : (
+                        <div
+                          className={header.column.getCanSort() ? "cursor-pointer select-none" : ""}
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {{ asc: " ↑", desc: " ↓" }[header.column.getIsSorted() as string] ?? null}
+                        </div>
+                      )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-slate-500">
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id} data-state={row.getIsSelected() ? "selected" : undefined}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center text-slate-500">
+                    {emptyMessage || "No data available."}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
       </div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="text-sm text-slate-500 dark:text-slate-400">

@@ -3,18 +3,19 @@ import { cn } from "@/lib/utils";
 
 interface KpiCardProps {
   label: string;
-  value: string;
+  value: string | number;
   change?: number;
   icon?: React.ReactNode;
+  color?: string;
 }
 
-export function KpiCard({ label, value, change, icon }: KpiCardProps) {
+export function KpiCard({ label, value, change, icon, color = "text-primary" }: KpiCardProps) {
   const isPositive = change !== undefined ? change >= 0 : undefined;
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-card border border-slate-100 dark:border-slate-800">
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
-        <span className="text-primary">{icon}</span>
+        <span className={cn(color)}>{icon}</span>
       </div>
       <div className="flex items-center gap-2">
         <p className="text-2xl font-semibold text-text dark:text-white">{value}</p>

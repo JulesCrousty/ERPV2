@@ -3,40 +3,66 @@
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSession, login, logout } from "@/lib/auth";
-import type { LoginPayload, Session } from "@/types/common";
+import { useEffect } from "react";
 
 const SESSION_KEY = ["session"];
 
-export function useSession() {
-  return useQuery<Session>({ queryKey: SESSION_KEY, queryFn: getSession, retry: false });
-}
-
 export function useAuth() {
-  const router = useRouter();
   const queryClient = useQueryClient();
-  const sessionQuery = useSession();
+  const router = useRouter();
+
+  const {
+    data: session,
+    isLoading,
+    refetch,
+    error
+  } = useQuery({
+    queryKey: SESSION_KEY,
+    queryFn: getSession,
+    retry: false
+  });
 
   const loginMutation = useMutation({
-    mutationFn: (payload: LoginPayload) => login(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: SESSION_KEY });
+    mutationFn: ({ email, password }: { email: string; password: string }) => login(email, password),
+    onSuccess: async () => {
+      await refetch();
       router.push("/");
     }
   });
 
   const logoutMutation = useMutation({
     mutationFn: logout,
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.removeQueries({ queryKey: SESSION_KEY });
       router.push("/(auth)/login");
     }
   });
 
   return {
-    session: sessionQuery.data,
-    isLoading: sessionQuery.isLoading || loginMutation.isPending,
+    session,
+    loading: isLoading,
+    isAuthenticated: !!session?.user,
+    role: session?.user?.role,
+    refreshSession: refetch,
     login: loginMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
-    error: loginMutation.error || sessionQuery.error
+    authError: error || loginMutation.error
   };
+}
+
+export function useProtectedRoute(allowedRoles?: string[]) {
+  const router = useRouter();
+  const { isAuthenticated, loading, role } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.replace("/(auth)/login");
+    }
+
+    if (!loading && allowedRoles && isAuthenticated && role && !allowedRoles.includes(role)) {
+      router.replace("/unauthorized");
+    }
+  }, [allowedRoles, isAuthenticated, loading, role, router]);
+
+  return { isAuthenticated, role, loading };
 }

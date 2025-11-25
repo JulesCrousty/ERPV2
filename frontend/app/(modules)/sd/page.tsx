@@ -1,50 +1,69 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import Card from "@/components/card";
 import { DataTable } from "@/components/data-table";
 import { PageTitle } from "@/components/page-title";
-import { SalesOrder } from "@/types/sd";
 import { Badge } from "@/ui/badge";
+import { useApi } from "@/hooks/useApi";
+import { useProtectedRoute } from "@/hooks/useAuth";
+import { Alert, AlertDescription, AlertTitle } from "@/ui/alert";
+import { Loader } from "@/components/loader";
 
-const orders: SalesOrder[] = [
-  { id: "SO-4501", customer: "Acme Corp", amount: 18200, status: "In Process", expectedDelivery: "2024-07-12" },
-  { id: "SO-4502", customer: "Globex", amount: 9800, status: "Completed", expectedDelivery: "2024-06-28" },
-  { id: "SO-4503", customer: "Innotech", amount: 15600, status: "Pending", expectedDelivery: "2024-07-20" }
-];
+interface SalesOrder {
+  id: string;
+  customer: string;
+  amount: number;
+  currency: string;
+  status: string;
+  date: string;
+}
 
 const columns: ColumnDef<SalesOrder>[] = [
   { header: "Order", accessorKey: "id" },
   { header: "Customer", accessorKey: "customer" },
   {
     header: "Amount",
-    cell: ({ row }) => <span className="font-semibold">${row.original.amount.toLocaleString()}</span>
+    cell: ({ row }) => (
+      <span className="font-semibold text-text dark:text-white">
+        {row.original.amount.toLocaleString()} {row.original.currency}
+      </span>
+    )
   },
   {
     header: "Status",
     cell: ({ row }) => <Badge variant="secondary">{row.original.status}</Badge>
   },
-  { header: "Delivery", accessorKey: "expectedDelivery" }
+  { header: "Date", accessorKey: "date" }
 ];
 
 export default function SDPage() {
+  useProtectedRoute(["admin", "manager"]);
+  const salesApi = useApi("/sd/sales-orders");
+  const salesOrders = salesApi.list({ limit: 25 });
+
   return (
     <div className="space-y-6">
-      <PageTitle title="Sales & Distribution" subtitle="Order to cash" />
+      <PageTitle title="Sales & Distribution" subtitle="Quotes, sales orders and billing automation" />
       <div className="grid gap-4 md:grid-cols-3">
-        <Card title="Pipeline" description="In process">
-          <p className="text-3xl font-semibold">$74,800</p>
+        <Card title="Open Orders" description="Pending fulfillment">
+          {salesOrders.isLoading ? <Loader /> : <p className="text-2xl font-semibold">{salesOrders.data?.length ?? 0}</p>}
         </Card>
-        <Card title="Fulfillment" description="Ontime ratio">
-          <p className="text-3xl font-semibold">96%</p>
+        <Card title="Invoiced" description="Current month" className="bg-primary/5">
+          <p className="text-2xl font-semibold">$1.2M</p>
         </Card>
-        <Card title="Returns" description="This month">
-          <p className="text-3xl font-semibold">3</p>
+        <Card title="Expedite" description="Urgent deliveries">
+          <p className="text-2xl font-semibold">5</p>
         </Card>
       </div>
-      <Card title="Sales Orders" description="Customer pipeline overview">
-        <DataTable columns={columns} data={orders} />
+      {salesOrders.error && (
+        <Alert variant="destructive">
+          <AlertTitle>Unable to load sales orders</AlertTitle>
+          <AlertDescription>{(salesOrders.error as Error).message}</AlertDescription>
+        </Alert>
+      )}
+      <Card title="Sales Orders" description="Latest customer commitments">
+        <DataTable columns={columns} data={salesOrders.data ?? []} loading={salesOrders.isLoading} />
       </Card>
     </div>
   );

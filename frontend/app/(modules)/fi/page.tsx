@@ -1,18 +1,27 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { BanknotesIcon } from "@heroicons/react/24/outline";
+import { BanknotesIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/data-table";
 import Card from "@/components/card";
 import { PageTitle } from "@/components/page-title";
-import { FinancialDocument } from "@/types/fi";
 import { Badge } from "@/ui/badge";
+import { useApi } from "@/hooks/useApi";
+import { useProtectedRoute } from "@/hooks/useAuth";
+import { api } from "@/lib/api";
+import { Alert, AlertDescription, AlertTitle } from "@/ui/alert";
+import { Button } from "@/ui/button";
+import { Loader } from "@/components/loader";
 
-const documents: FinancialDocument[] = [
-  { id: "FI-1001", type: "Journal", amount: 12500, currency: "USD", status: "Posted", date: "2024-07-01" },
-  { id: "FI-1002", type: "Invoice", amount: 9800, currency: "EUR", status: "Open", date: "2024-07-02" },
-  { id: "FI-1003", type: "Tax", amount: 4500, currency: "USD", status: "Draft", date: "2024-07-03" }
-];
+interface FinancialDocument {
+  id: string;
+  type: string;
+  amount: number;
+  currency: string;
+  status: string;
+  date: string;
+}
 
 const columns: ColumnDef<FinancialDocument>[] = [
   { header: "Document", accessorKey: "id" },
@@ -33,24 +42,63 @@ const columns: ColumnDef<FinancialDocument>[] = [
 ];
 
 export default function FinancePage() {
+  useProtectedRoute(["admin", "manager"]);
+  const documentsApi = useApi("/fi/documents");
+  const documents = documentsApi.list({ limit: 20 });
+
+  const journalMutation = useMutation({
+    mutationFn: () => api.post("/fi/journals", { reference: "WEB-POST", amount: 1000 }),
+    onSuccess: () => documents.refetch()
+  });
+
+  const metrics = useQuery({
+    queryKey: ["fi-kpi"],
+    queryFn: () => api.post("/analytics/metrics/run", { metric_code: "FI_BALANCE" }) as Promise<{ value: number }>,
+    retry: false
+  });
+
   return (
     <div className="space-y-6">
       <PageTitle title="Finance" subtitle="Balance sheets, journals and compliance" />
       <div className="grid gap-4 md:grid-cols-3">
-        <Card title="Balance" description="Current month" className="bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-slate-800">
-          <div className="flex items-center gap-3 text-3xl font-semibold text-text dark:text-white">
-            <BanknotesIcon className="h-8 w-8 text-primary" />$245,800
+        <Card
+          title="Balance"
+          description="Current month"
+          className="bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-slate-800"
+        >
+          {metrics.isLoading ? (
+            <Loader label="Loading balance" />
+          ) : (
+            <div className="flex items-center gap-3 text-3xl font-semibold text-text dark:text-white">
+              <BanknotesIcon className="h-8 w-8 text-primary" />
+              ${metrics.data?.value?.toLocaleString() ?? "--"}
+            </div>
+          )}
+        </Card>
+        <Card title="Post Journal" description="Sync with ledger" actions={<span className="text-xs text-slate-500">/fi/journals</span>}>
+          <div className="flex items-center gap-3 text-2xl font-semibold">
+            <Button onClick={() => journalMutation.mutate()} disabled={journalMutation.isLoading}>
+              <PlusIcon className="h-4 w-4 mr-2" /> Create journal
+            </Button>
           </div>
         </Card>
-        <Card title="Open Journals" description="Awaiting posting">
-          <p className="text-2xl font-semibold">18</p>
-        </Card>
-        <Card title="Tax Items" description="Pending submissions">
-          <p className="text-2xl font-semibold">7</p>
+        <Card title="Compliance" description="Tax submissions" className="bg-primary/5">
+          <p className="text-2xl font-semibold">Automated</p>
         </Card>
       </div>
+      {documents.error && (
+        <Alert variant="destructive">
+          <AlertTitle>Unable to load documents</AlertTitle>
+          <AlertDescription>{(documents.error as Error).message}</AlertDescription>
+        </Alert>
+      )}
       <Card title="Documents" description="Latest financial entries">
-        <DataTable columns={columns} data={documents} />
+        <DataTable
+          columns={columns}
+          data={documents.data ?? []}
+          loading={documents.isLoading}
+          emptyMessage="No financial documents found"
+        />
       </Card>
     </div>
   );
