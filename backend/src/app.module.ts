@@ -9,6 +9,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { AuthModule } from './modules/auth/auth.module';
 import { CoreModule } from './modules/core/core.module';
 import { FiModule } from './modules/fi/fi.module';
+import { SdModule } from './modules/sd/sd.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { FiModule } from './modules/fi/fi.module';
     AuthModule,
     CoreModule,
     FiModule,
+    SdModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
